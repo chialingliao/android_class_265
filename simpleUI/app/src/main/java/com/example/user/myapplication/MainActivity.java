@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     String note = "";
     String drinkName = "black tea";
     ListView listView;
+    Spinner spinner;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         checkBox = (CheckBox) findViewById(R.id.hideCheckBox);
         listView = (ListView)findViewById(R.id.listView);
         orders = new ArrayList<>();
+        spinner = ( Spinner)findViewById(R.id.spinner);
+
         editText.setOnKeyListener(new View.OnKeyListener() {//ENTER 等同BTN效果
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -65,12 +69,24 @@ public class MainActivity extends AppCompatActivity {
                 drinkName = radioButton.getText().toString();
             }
         });
+
+        setupListView();
+        setupSpinner();
    }
     void setupListView(){
  //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
         OrderAdapter adapter = new OrderAdapter(this, orders);//自建物件
         listView.setAdapter(adapter);//把東西丟進去
     }
+
+    void setupSpinner(){
+        String[] data = getResources().getStringArray(R.array.storeInfo);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
+
+        spinner.setAdapter(adapter);
+    }
+
+
     public void click(View view) {//BTN 改值 須設定ONCLICK
         note = editText.getText().toString(); //把畫面資料抓出來
         String text = note;
@@ -79,10 +95,12 @@ public class MainActivity extends AppCompatActivity {
         Order order = new Order();
         order.drinkName = drinkName;
         order.note = note;
+        order.storeInfo = (String)spinner.getSelectedItem();//選擇後的值
         orders.add(order);
 
         editText.setText("");//資料抓完清空
         setupListView();
+        setupSpinner();
     }
 
 }
