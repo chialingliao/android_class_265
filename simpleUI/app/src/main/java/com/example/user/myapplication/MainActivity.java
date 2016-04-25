@@ -8,6 +8,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -17,9 +18,8 @@ public class MainActivity extends AppCompatActivity {
     EditText editText;
     RadioGroup radioGroup;
     CheckBox checkBox;
-    String sex = "";
-    String name = "";
-    String selectdSex = "Male";
+    String note = "";
+    String drinkName = "black tea";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,39 +54,18 @@ public class MainActivity extends AppCompatActivity {
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.maleRadioButton) {
-                    selectdSex = "Male";
-                } else if (checkedId == R.id.femaleRadioButton) {
-                    selectdSex = "Female";
-                }
-            }
-        });
 
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {//隱藏字串
-                if(name != ""){
-                    changeTextView();
-                }
+                RadioButton radioButton = (RadioButton)findViewById(checkedId);//直接取名字來用
+                drinkName = radioButton.getText().toString();
             }
         });
-    }
+   }
 
     public void click(View view) {//BTN 改值 須設定ONCLICK
-        name = editText.getText().toString(); //把畫面資料抓出來
-        sex = selectdSex;
-        changeTextView();
+        note = editText.getText().toString(); //把畫面資料抓出來
+        String text = note;
+        textView.setText(text);
         editText.setText("");//資料抓完清空
     }
 
-    public void changeTextView() {//CHECKBOX 判斷隱藏字串
-        if(checkBox.isChecked()){
-            String text = name;
-            textView.setText(text);
-        }else{
-            String text = name + " sex: " + sex;//資料 + radio值
-            textView.setText(text);
-        }
-
-    }
 }
