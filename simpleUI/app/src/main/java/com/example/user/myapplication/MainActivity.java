@@ -5,12 +5,16 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -18,9 +22,10 @@ public class MainActivity extends AppCompatActivity {
     EditText editText;
     RadioGroup radioGroup;
     CheckBox checkBox;
+    ArrayList<Order> orders;
     String note = "";
     String drinkName = "black tea";
-
+    ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
         editText = (EditText) findViewById(R.id.editText);
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         checkBox = (CheckBox) findViewById(R.id.hideCheckBox);
-
+        listView = (ListView)findViewById(R.id.listView);
+        orders = new ArrayList<>();
         editText.setOnKeyListener(new View.OnKeyListener() {//ENTER 等同BTN效果
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -55,17 +61,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
 
-                RadioButton radioButton = (RadioButton)findViewById(checkedId);//直接取名字來用
+                RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
                 drinkName = radioButton.getText().toString();
             }
         });
    }
-
+    void setupListView(){
+ //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
+        OrderAdapter adapter = new OrderAdapter(this, orders);//自建物件
+        listView.setAdapter(adapter);//把東西丟進去
+    }
     public void click(View view) {//BTN 改值 須設定ONCLICK
         note = editText.getText().toString(); //把畫面資料抓出來
         String text = note;
         textView.setText(text);
+        //改成塞物件
+        Order order = new Order();
+        order.drinkName = drinkName;
+        order.note = note;
+        orders.add(order);
+
         editText.setText("");//資料抓完清空
+        setupListView();
     }
 
 }
