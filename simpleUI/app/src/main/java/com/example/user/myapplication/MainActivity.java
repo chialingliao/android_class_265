@@ -1,10 +1,12 @@
 package com.example.user.myapplication;
 
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -14,6 +16,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -67,6 +70,18 @@ public class MainActivity extends AppCompatActivity {
 
                 RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
                 drinkName = radioButton.getText().toString();
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {//點擊listView 的資訊
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Order order = (Order)parent.getAdapter().getItem(position);//取得點擊的資訊 物件可轉型   parent.getAdapter() 拿出資料串
+   /*             Toast.makeText(MainActivity.this,order.note, Toast.LENGTH_SHORT).show();//顯示效果  LENGTH_SHORT /LENGTH_LONG 效果的長短
+                //↑this 如果MainActivity 未加 會變成  AdapterView.OnItemClickListener 本身*/
+                Snackbar.make(view,order.note, Snackbar.LENGTH_SHORT).show();//顯示功能速度比Toast 快 搭配元件 compile 'com.android.support:design:23.2.1'
+                //Snackbar 取代Toast 原因1.點擊後可在進一步UI 2.各元件可以UI互通
+                //Snackbar.make(view,order.note, Snackbar.LENGTH_SHORT).setAction()//點擊後可執行的METHOD
             }
         });
 
