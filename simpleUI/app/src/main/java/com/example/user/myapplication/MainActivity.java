@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     EditText editText;
     RadioGroup radioGroup;
     CheckBox checkBox;
-    ArrayList<Order> orders;
+    List<Order> orders;
     String note = "";
     String drinkName;
     ListView listView;
@@ -107,10 +108,10 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {//點擊listView 的資訊
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Order order = (Order)parent.getAdapter().getItem(position);//取得點擊的資訊 物件可轉型   parent.getAdapter() 拿出資料串
+                Order order = (Order) parent.getAdapter().getItem(position);//取得點擊的資訊 物件可轉型   parent.getAdapter() 拿出資料串
    /*             Toast.makeText(MainActivity.this,order.note, Toast.LENGTH_SHORT).show();//顯示效果  LENGTH_SHORT /LENGTH_LONG 效果的長短
                 //↑this 如果MainActivity 未加 會變成  AdapterView.OnItemClickListener 本身*/
-                Snackbar.make(view,order.getNote(), Snackbar.LENGTH_SHORT).show();//顯示功能速度比Toast 快 搭配元件 compile 'com.android.support:design:23.2.1'
+                Snackbar.make(view, order.getNote(), Snackbar.LENGTH_SHORT).show();//顯示功能速度比Toast 快 搭配元件 compile 'com.android.support:design:23.2.1'
                 //Snackbar 取代Toast 原因1.點擊後可在進一步UI 2.各元件可以UI互通
                 //Snackbar.make(view,order.note, Snackbar.LENGTH_SHORT).setAction()//點擊後可執行的METHOD
             }
@@ -118,22 +119,32 @@ public class MainActivity extends AppCompatActivity {
 
         setupListView();
         setupSpinner();
-/*        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        }
+        int selectedId = sp.getInt("spinner",0);
+        spinner.setSelection(selectedId);
 
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-
-        }
-    });
-
-    spinner.setSelection();
+       spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+           @Override
+           public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+               editor.putInt("spinner", position);//先定義
+               editor.apply();
 
 
-*/
+           }
+
+           @Override
+           public void onNothingSelected(AdapterView<?> parent) {
+//               editor.putInt("spinner", 0);//先定義
+//               editor.apply();
+      /*         int selectedId = sp.getInt("spinner",0);
+               spinner.setSelection(selectedId);*/
+           }
+       });
+
+//    spinner.setSelection();
+
+
+
 
 
 
