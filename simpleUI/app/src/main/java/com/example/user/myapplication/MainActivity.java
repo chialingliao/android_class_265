@@ -1,5 +1,7 @@
 package com.example.user.myapplication;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
     String drinkName = "black tea";
     ListView listView;
     Spinner spinner;
+    //存入記憶體 若大量存取及寫入會爆炸
+    SharedPreferences sp;
+    SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,9 +49,19 @@ public class MainActivity extends AppCompatActivity {
         orders = new ArrayList<>();
         spinner = ( Spinner)findViewById(R.id.spinner);
 
+        sp = getSharedPreferences("setting", Context.MODE_PRIVATE);//你要拿setting 裡的東西
+        editor = sp.edit();//拿出setting裡某特殊內容 寫入
+        String[] data = Utils.readFile(this, "notes").split("\n");//取得分割後的資料
+        textView.setText(data[0]);//讀取需要的資料
+      //  textView.setText(Utils.readFile(this, "notes"));
+        editText.setText(sp.getString("editText", ""));//下次進來可直接取得 但二變數是預設值 無值顯示空字串
+
         editText.setOnKeyListener(new View.OnKeyListener() {//ENTER 等同BTN效果
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
+                String text = editText.getText().toString();//拿到前一次的內容
+                editor.putString("editText", text);
+                editor.apply();//必寫才能運作
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
                     click(v);
                     return true;//攔截ENTER
@@ -63,11 +79,14 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-
+ //       radioGroup.check(sp.getInt("radioGroup",R.id.blackteaRadioButton));//預設要抓ID  儲存radioGroup 的狀態
+        int checkedId = sp.getInt("radioGroup",R.id.blackteaRadioButton);
+        radioGroup.check(checkedId);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-
+                editor.putInt("radioGroup", checkedId);//先定義
+                editor.apply();
                 RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
                 drinkName = radioButton.getText().toString();
             }
@@ -102,6 +121,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+/*    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    });
+
+    spinner.setSelection();
+
+*/
     public void click(View view) {//BTN 改值 須設定ONCLICK
         note = editText.getText().toString(); //把畫面資料抓出來
         String text = note;
@@ -112,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
         order.note = note;
         order.storeInfo = (String)spinner.getSelectedItem();//選擇後的值
         orders.add(order);
+
+        Utils.writeFile(this, "notes", order.note + "\n");
 
         editText.setText("");//資料抓完清空
         setupListView();
