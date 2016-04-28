@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.Inflater;
 
 /**
@@ -15,10 +16,10 @@ import java.util.zip.Inflater;
  */
 //資料轉換器
 public class OrderAdapter extends BaseAdapter{
-    ArrayList<Order> orders;
+    List<Order> orders;
     LayoutInflater inflater;//幫助放大縮小
 
-    public OrderAdapter(Context contex, ArrayList<Order> orders){//建構子
+    public OrderAdapter(Context contex, List<Order> orders){//建構子
         this.inflater = LayoutInflater.from(contex);
         this.orders = orders;
     }
@@ -55,9 +56,9 @@ public class OrderAdapter extends BaseAdapter{
             holder = (Holder)convertView.getTag();//某個空間
         }
         //直接用holder取得DATA
-        holder.drinkName.setText(orders.get(position).drinkName);
-        holder.note.setText(orders.get(position).note);
-        holder.storeInfo.setText(orders.get(position).storeInfo);
+        holder.drinkName.setText(orders.get(position).getDrinkName());
+        holder.note.setText(orders.get(position).getNote());
+        holder.storeInfo.setText(orders.get(position).getStoreInfo());
         //設定值
   /*      drinkName.setText(orders.get(position).drinkName);
         note.setText(orders.get(position).note);

@@ -22,6 +22,11 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+import io.realm.internal.async.QueryUpdateTask;
+
 
 public class MainActivity extends AppCompatActivity {
     TextView textView;//宣告
@@ -30,13 +35,14 @@ public class MainActivity extends AppCompatActivity {
     CheckBox checkBox;
     ArrayList<Order> orders;
     String note = "";
-    String drinkName = "black tea";
+    String drinkName;
     ListView listView;
     Spinner spinner;
     //存入記憶體 若大量存取及寫入會爆炸
     SharedPreferences sp;
     SharedPreferences.Editor editor;
 
+    Realm realm;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,9 +57,12 @@ public class MainActivity extends AppCompatActivity {
 
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);//你要拿setting 裡的東西
         editor = sp.edit();//拿出setting裡某特殊內容 寫入
-        String[] data = Utils.readFile(this, "notes").split("\n");//取得分割後的資料
-        textView.setText(data[0]);//讀取需要的資料
-      //  textView.setText(Utils.readFile(this, "notes"));
+
+        // Create a RealmConfiguration which is to locate Realm file in package's "files" directory.
+        RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).build();
+        // Get a Realm instance for this thread
+        realm = Realm.getInstance(realmConfig);
+
         editText.setText(sp.getString("editText", ""));//下次進來可直接取得 但二變數是預設值 無值顯示空字串
 
         editText.setOnKeyListener(new View.OnKeyListener() {//ENTER 等同BTN效果
@@ -82,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
  //       radioGroup.check(sp.getInt("radioGroup",R.id.blackteaRadioButton));//預設要抓ID  儲存radioGroup 的狀態
         int checkedId = sp.getInt("radioGroup",R.id.blackteaRadioButton);
         radioGroup.check(checkedId);
+        RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
+        drinkName = radioButton.getText().toString();
+
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -98,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 Order order = (Order)parent.getAdapter().getItem(position);//取得點擊的資訊 物件可轉型   parent.getAdapter() 拿出資料串
    /*             Toast.makeText(MainActivity.this,order.note, Toast.LENGTH_SHORT).show();//顯示效果  LENGTH_SHORT /LENGTH_LONG 效果的長短
                 //↑this 如果MainActivity 未加 會變成  AdapterView.OnItemClickListener 本身*/
-                Snackbar.make(view,order.note, Snackbar.LENGTH_SHORT).show();//顯示功能速度比Toast 快 搭配元件 compile 'com.android.support:design:23.2.1'
+                Snackbar.make(view,order.getNote(), Snackbar.LENGTH_SHORT).show();//顯示功能速度比Toast 快 搭配元件 compile 'com.android.support:design:23.2.1'
                 //Snackbar 取代Toast 原因1.點擊後可在進一步UI 2.各元件可以UI互通
                 //Snackbar.make(view,order.note, Snackbar.LENGTH_SHORT).setAction()//點擊後可執行的METHOD
             }
@@ -106,22 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
         setupListView();
         setupSpinner();
-   }
-    void setupListView(){
- //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
-        OrderAdapter adapter = new OrderAdapter(this, orders);//自建物件
-        listView.setAdapter(adapter);//把東西丟進去
-    }
-
-    void setupSpinner(){
-        String[] data = getResources().getStringArray(R.array.storeInfo);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
-
-        spinner.setAdapter(adapter);
-    }
-
-
-/*    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+/*        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
@@ -135,19 +132,50 @@ public class MainActivity extends AppCompatActivity {
 
     spinner.setSelection();
 
+
 */
+
+
+
+
+   }
+    void setupListView(){
+ //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
+        RealmResults results = realm.allObjects(Order.class);//所有的訂單
+
+        OrderAdapter adapter = new OrderAdapter(this, results.subList(0,results.size()));//自建物件
+        listView.setAdapter(adapter);//把東西丟進去
+    }
+
+    void setupSpinner(){
+        String[] data = getResources().getStringArray(R.array.storeInfo);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
+
+        spinner.setAdapter(adapter);
+    }
+
+
+
     public void click(View view) {//BTN 改值 須設定ONCLICK
         note = editText.getText().toString(); //把畫面資料抓出來
         String text = note;
         textView.setText(text);
         //改成塞物件
         Order order = new Order();
-        order.drinkName = drinkName;
-        order.note = note;
-        order.storeInfo = (String)spinner.getSelectedItem();//選擇後的值
-        orders.add(order);
+        order.setDrinkName(drinkName);
+        order.setNote(note);
+        order.setStoreInfo((String) spinner.getSelectedItem());//選擇後的值
 
-        Utils.writeFile(this, "notes", order.note + "\n");
+
+        realm.beginTransaction();
+        realm.copyToRealm(order);
+        realm.commitTransaction();
+
+
+
+      //  orders.add(order);
+
+
 
         editText.setText("");//資料抓完清空
         setupListView();
