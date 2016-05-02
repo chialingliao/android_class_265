@@ -7,9 +7,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
-import java.util.zip.Inflater;
 
 /**
  * Created by user on 2016/4/25.
@@ -48,15 +50,32 @@ public class OrderAdapter extends BaseAdapter{
         if(convertView== null){
             convertView = inflater.inflate(R.layout.listview_item, null);// 第一次給要先定義
             holder = new Holder();
-            holder.drinkName = (TextView)convertView.findViewById(R.id.drinkName);
+            holder.drinkNumber = (TextView)convertView.findViewById(R.id.drinkNumber);
             holder.note = (TextView)convertView.findViewById(R.id.note);
             holder.storeInfo = (TextView)convertView.findViewById(R.id.store);
             convertView.setTag(holder);
         }else {//其他直接用省資源
             holder = (Holder)convertView.getTag();//某個空間
         }
+
+        int total = 0;
+        try {
+            JSONArray jsonArray = new JSONArray(orders.get(position).getMenuResult());
+            for(int i = 0 ; i < jsonArray.length(); i++){
+                JSONObject menu = jsonArray.getJSONObject(i);
+
+                total += menu.getInt("m");
+                total += menu.getInt("l");
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
         //直接用holder取得DATA
-        holder.drinkName.setText(orders.get(position).getDrinkName());
+        holder.drinkNumber.setText(String.valueOf(total));
         holder.note.setText(orders.get(position).getNote());
         holder.storeInfo.setText(orders.get(position).getStoreInfo());
         //設定值
@@ -67,7 +86,7 @@ public class OrderAdapter extends BaseAdapter{
     }
 
     class Holder{
-        TextView drinkName;
+        TextView drinkNumber;
         TextView note;
         TextView storeInfo;
     }

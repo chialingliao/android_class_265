@@ -13,14 +13,11 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +25,11 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
-import io.realm.internal.async.QueryUpdateTask;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static final int REQUEST_CODE_MENU_ACTIVITY = 0;
+
     TextView textView;//宣告
     EditText editText;
     RadioGroup radioGroup;
@@ -41,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     String drinkName;
     ListView listView;
     Spinner spinner;
+    String menuResults = "";
+
     //存入記憶體 若大量存取及寫入會爆炸
     SharedPreferences sp;
     SharedPreferences.Editor editor;
@@ -59,11 +59,12 @@ public class MainActivity extends AppCompatActivity {
         orders = new ArrayList<>();
         spinner = ( Spinner)findViewById(R.id.spinner);
 
+
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);//你要拿setting 裡的東西
         editor = sp.edit();//拿出setting裡某特殊內容 寫入
 
         // Create a RealmConfiguration which is to locate Realm file in package's "files" directory.
-        RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).build();
+        RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).deleteRealmIfMigrationNeeded().build();
         // Get a Realm instance for this thread
         realm = Realm.getInstance(realmConfig);
 
@@ -174,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(text);
         //改成塞物件
         Order order = new Order();
-        order.setDrinkName(drinkName);
+        order.setMenuResult(menuResults);
         order.setNote(note);
         order.setStoreInfo((String) spinner.getSelectedItem());//選擇後的值
 
@@ -190,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         editText.setText("");//資料抓完清空
+        menuResults = "";
         setupListView();
     //    setupSpinner();
     }
@@ -197,10 +199,22 @@ public class MainActivity extends AppCompatActivity {
     public  void goToMenu(View view){
         Intent intent = new Intent();//媒介 讓ACTIVITY 跳ACTIVITY
         intent.setClass(this, DrinkMenuActivity.class);//呼叫他
-        startActivity(intent);//新的Activity即產生
+    //    startActivity(intent);//新的Activity即產生
+        startActivityForResult(intent, REQUEST_CODE_MENU_ACTIVITY);//知道是誰帶回 資訊可以做處理
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {//讀取結果
+        super.onActivityResult(requestCode, resultCode, data);
+        //先檢查是否通過驗證 得到回傳資料
+        if(requestCode == REQUEST_CODE_MENU_ACTIVITY){
+            if(resultCode == RESULT_OK){
+                menuResults = data.getStringExtra("result");
+
+            }
+        }
+    }
 
     protected void onStart(){
         super.onStart();

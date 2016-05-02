@@ -1,5 +1,6 @@
 package com.example.user.myapplication;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,7 +36,11 @@ public class DrinkMenuActivity extends AppCompatActivity {
     }
 
     public  void done(View view){
-        getData();
+        Intent intent = new Intent();
+        intent.putExtra("result", getData().toString());//資料接進來放入
+
+        setResult(RESULT_OK, intent);//跟main說資料ok
+        finish();
     }
 
     public JSONArray getData(){
