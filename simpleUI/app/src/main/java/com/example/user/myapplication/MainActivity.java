@@ -1,10 +1,12 @@
 package com.example.user.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d("debug", "Main Activity OnCreate");
         textView = (TextView) findViewById(R.id.textView);//去找VIEW ,須轉型態
         editText = (EditText) findViewById(R.id.editText);
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
@@ -90,20 +93,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
  //       radioGroup.check(sp.getInt("radioGroup",R.id.blackteaRadioButton));//預設要抓ID  儲存radioGroup 的狀態
-        int checkedId = sp.getInt("radioGroup",R.id.blackteaRadioButton);
-        radioGroup.check(checkedId);
-        RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
-        drinkName = radioButton.getText().toString();
-
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                editor.putInt("radioGroup", checkedId);//先定義
-                editor.apply();
-                RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
-                drinkName = radioButton.getText().toString();
-            }
-        });
+//        int checkedId = sp.getInt("radioGroup",R.id.blackteaRadioButton);
+//        radioGroup.check(checkedId);
+//        RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
+//        drinkName = radioButton.getText().toString();
+//
+//        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(RadioGroup group, int checkedId) {
+//                editor.putInt("radioGroup", checkedId);//先定義
+//                editor.apply();
+//                RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
+//                drinkName = radioButton.getText().toString();
+//            }
+//        });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {//點擊listView 的資訊
             @Override
@@ -120,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
         setupListView();
         setupSpinner();
 
+        //下拉初始化
         int selectedId = sp.getInt("spinner",0);
         spinner.setSelection(selectedId);
 
@@ -134,10 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
            @Override
            public void onNothingSelected(AdapterView<?> parent) {
-//               editor.putInt("spinner", 0);//先定義
-//               editor.apply();
-      /*         int selectedId = sp.getInt("spinner",0);
-               spinner.setSelection(selectedId);*/
+
            }
        });
 
@@ -190,7 +191,45 @@ public class MainActivity extends AppCompatActivity {
 
         editText.setText("");//資料抓完清空
         setupListView();
-        setupSpinner();
+    //    setupSpinner();
     }
 
+    public  void goToMenu(View view){
+        Intent intent = new Intent();//媒介 讓ACTIVITY 跳ACTIVITY
+        intent.setClass(this, DrinkMenuActivity.class);//呼叫他
+        startActivity(intent);//新的Activity即產生
+
+    }
+
+
+    protected void onStart(){
+        super.onStart();
+        Log.d("debug","Main Activity OnStart");
+    }
+
+    protected void onResume(){
+        super.onResume();
+        Log.d("debug","Main Activity OnResume");
+    }
+
+    protected  void onPause(){
+        super.onPause();
+        Log.d("debug","Main Activity OnPause");
+    }
+
+    protected  void onStop(){//儲存動作 避免流失
+        super.onStop();
+        Log.d("debug","Main Activity OnStop");
+    }
+
+    protected  void onRestart() {//重新整料再次顯示
+        super.onRestart();
+        Log.d("debug", "Main Activity OnRestart");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("debug", "Main Activity OnDestroy");
+    }
 }
