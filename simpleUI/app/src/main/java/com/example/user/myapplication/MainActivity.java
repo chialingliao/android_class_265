@@ -3,6 +3,7 @@ package com.example.user.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +19,14 @@ import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,18 +55,42 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
 
     Realm realm;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d("debug", "Main Activity OnCreate");
+
+ /*
+        HW2
+        ParseObject testObject = new ParseObject("HomeworkParse");//CLASS名稱
+        testObject.put("sid", "廖佳玲");//欄位 對應值
+        testObject.put("email", "green730304@yahoo.com.tw");//欄位 對應值
+        testObject.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if(e!=null) {
+                    Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(MainActivity.this, "save success", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+*/
+
         textView = (TextView) findViewById(R.id.textView);//去找VIEW ,須轉型態
         editText = (EditText) findViewById(R.id.editText);
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         checkBox = (CheckBox) findViewById(R.id.hideCheckBox);
-        listView = (ListView)findViewById(R.id.listView);
+        listView = (ListView) findViewById(R.id.listView);
         orders = new ArrayList<>();
-        spinner = ( Spinner)findViewById(R.id.spinner);
+        spinner = (Spinner) findViewById(R.id.spinner);
 
 
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);//你要拿setting 裡的東西
@@ -93,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
- //       radioGroup.check(sp.getInt("radioGroup",R.id.blackteaRadioButton));//預設要抓ID  儲存radioGroup 的狀態
+        //       radioGroup.check(sp.getInt("radioGroup",R.id.blackteaRadioButton));//預設要抓ID  儲存radioGroup 的狀態
 //        int checkedId = sp.getInt("radioGroup",R.id.blackteaRadioButton);
 //        radioGroup.check(checkedId);
 //        RadioButton radioButton = (RadioButton) findViewById(checkedId);//直接取名字來用
@@ -125,48 +158,46 @@ public class MainActivity extends AppCompatActivity {
         setupSpinner();
 
         //下拉初始化
-        int selectedId = sp.getInt("spinner",0);
+        int selectedId = sp.getInt("spinner", 0);
         spinner.setSelection(selectedId);
 
-       spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-           @Override
-           public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-               editor.putInt("spinner", position);//先定義
-               editor.apply();
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                editor.putInt("spinner", position);//先定義
+                editor.apply();
 
 
-           }
+            }
 
-           @Override
-           public void onNothingSelected(AdapterView<?> parent) {
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
 
-           }
-       });
+            }
+        });
 
 //    spinner.setSelection();
 
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
 
-
-
-
-
-   }
-    void setupListView(){
- //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
+    void setupListView() {
+        //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
         RealmResults results = realm.allObjects(Order.class);//所有的訂單
 
-        OrderAdapter adapter = new OrderAdapter(this, results.subList(0,results.size()));//自建物件
+        OrderAdapter adapter = new OrderAdapter(this, results.subList(0, results.size()));//自建物件
         listView.setAdapter(adapter);//把東西丟進去
     }
 
-    void setupSpinner(){
+    void setupSpinner() {
         String[] data = getResources().getStringArray(R.array.storeInfo);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
 
         spinner.setAdapter(adapter);
     }
-
 
 
     public void click(View view) {//BTN 改值 須設定ONCLICK
@@ -185,21 +216,19 @@ public class MainActivity extends AppCompatActivity {
         realm.commitTransaction();
 
 
-
-      //  orders.add(order);
-
+        //  orders.add(order);
 
 
         editText.setText("");//資料抓完清空
         menuResults = "";
         setupListView();
-    //    setupSpinner();
+        //    setupSpinner();
     }
 
-    public  void goToMenu(View view){
+    public void goToMenu(View view) {
         Intent intent = new Intent();//媒介 讓ACTIVITY 跳ACTIVITY
         intent.setClass(this, DrinkMenuActivity.class);//呼叫他
-    //    startActivity(intent);//新的Activity即產生
+        //    startActivity(intent);//新的Activity即產生
         startActivityForResult(intent, REQUEST_CODE_MENU_ACTIVITY);//知道是誰帶回 資訊可以做處理
 
     }
@@ -208,35 +237,67 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {//讀取結果
         super.onActivityResult(requestCode, resultCode, data);
         //先檢查是否通過驗證 得到回傳資料
-        if(requestCode == REQUEST_CODE_MENU_ACTIVITY){
-            if(resultCode == RESULT_OK){
+        if (requestCode == REQUEST_CODE_MENU_ACTIVITY) {
+            if (resultCode == RESULT_OK) {
                 menuResults = data.getStringExtra("result");
 
             }
         }
     }
 
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
-        Log.d("debug","Main Activity OnStart");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Log.d("debug", "Main Activity OnStart");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.user.myapplication/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
-        Log.d("debug","Main Activity OnResume");
+        Log.d("debug", "Main Activity OnResume");
     }
 
-    protected  void onPause(){
+    protected void onPause() {
         super.onPause();
-        Log.d("debug","Main Activity OnPause");
+        Log.d("debug", "Main Activity OnPause");
     }
 
-    protected  void onStop(){//儲存動作 避免流失
+    protected void onStop() {//儲存動作 避免流失
         super.onStop();
-        Log.d("debug","Main Activity OnStop");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.user.myapplication/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        Log.d("debug", "Main Activity OnStop");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.disconnect();
     }
 
-    protected  void onRestart() {//重新整料再次顯示
+    protected void onRestart() {//重新整料再次顯示
         super.onRestart();
         Log.d("debug", "Main Activity OnRestart");
     }
