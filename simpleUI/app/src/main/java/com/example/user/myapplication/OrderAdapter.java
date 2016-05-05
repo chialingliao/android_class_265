@@ -60,7 +60,7 @@ public class OrderAdapter extends BaseAdapter{
 
         int total = 0;
         try {
-            JSONArray jsonArray = new JSONArray(orders.get(position).getMenuResult());
+            JSONArray jsonArray = new JSONArray(orders.get(position).getMenuResults());
             for(int i = 0 ; i < jsonArray.length(); i++){
                 JSONObject menu = jsonArray.getJSONObject(i);
 

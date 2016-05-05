@@ -24,8 +24,10 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
 import java.util.ArrayList;
@@ -98,9 +100,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Create a RealmConfiguration which is to locate Realm file in package's "files" directory.
         RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).deleteRealmIfMigrationNeeded().build();
+        Realm.setDefaultConfiguration(realmConfig);//Default
         // Get a Realm instance for this thread
-        realm = Realm.getInstance(realmConfig);
-
+       // realm = Realm.getInstance(realmConfig);
+        realm = Realm.getDefaultInstance();
         editText.setText(sp.getString("editText", ""));//下次進來可直接取得 但二變數是預設值 無值顯示空字串
 
         editText.setOnKeyListener(new View.OnKeyListener() {//ENTER 等同BTN效果
@@ -186,10 +189,39 @@ public class MainActivity extends AppCompatActivity {
 
     void setupListView() {
         //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
-        RealmResults results = realm.allObjects(Order.class);//所有的訂單
+/*        RealmResults results = realm.allObjects(Order.class);//所有的訂單
 
         OrderAdapter adapter = new OrderAdapter(this, results.subList(0, results.size()));//自建物件
         listView.setAdapter(adapter);//把東西丟進去
+*/
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Order");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if(e!=null){
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    Realm realm = Realm.getDefaultInstance();
+                    RealmResults results = realm.allObjects(Order.class);//所有的訂單
+
+                    OrderAdapter adapter = new OrderAdapter(MainActivity.this, results.subList(0, results.size()));//自建物件
+                    listView.setAdapter(adapter);//把東西丟進去
+                    realm.close();
+
+                    return;
+                }
+                List<Order> orders = new ArrayList<Order>();
+                for(int i = 0 ; i < objects.size(); i++){
+                    Order order = new Order();
+                    order.setNote(objects.get(i).getString("note"));
+                    order.setStoreInfo(objects.get(i).getString("storeInfo"));
+                    order.setMenuResults(objects.get(i).getString("menuResults"));
+                    orders.add(order);
+                }
+                OrderAdapter adapter = new OrderAdapter(MainActivity.this, orders);
+                listView.setAdapter(adapter);//把東西丟進去
+            }
+        });
     }
 
     void setupSpinner() {
@@ -206,23 +238,42 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(text);
         //改成塞物件
         Order order = new Order();
-        order.setMenuResult(menuResults);
+        order.setMenuResults(menuResults);
         order.setNote(note);
         order.setStoreInfo((String) spinner.getSelectedItem());//選擇後的值
 
-
-        realm.beginTransaction();
+        //LOCAL端
+ /*       realm.beginTransaction();
         realm.copyToRealm(order);
         realm.commitTransaction();
+*/
+        SaveCallbackWithRealm callbackWithRealm = new SaveCallbackWithRealm(order, new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e != null) {
+                    Toast.makeText(MainActivity.this, "Save Fail", Toast.LENGTH_LONG).show();
+
+                }
+                editText.setText("");//資料抓完清空
+                menuResults = "";
+
+     /*           Realm realm = Realm.getDefaultInstance();
+                //LOCAL端
+                realm.beginTransaction();
+                realm.copyToRealm(order);
+                realm.commitTransaction();
+
+                realm.close();*/
+                setupListView();
 
 
+            }
+        });
         //  orders.add(order);
 
 
-        editText.setText("");//資料抓完清空
-        menuResults = "";
-        setupListView();
         //    setupSpinner();
+        order.saveToRemote(callbackWithRealm);
     }
 
     public void goToMenu(View view) {
@@ -305,6 +356,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        realm.close();
         Log.d("debug", "Main Activity OnDestroy");
     }
 }

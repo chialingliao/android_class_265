@@ -1,5 +1,8 @@
 package com.example.user.myapplication;
 
+import com.parse.ParseObject;
+import com.parse.SaveCallback;
+
 import io.realm.RealmObject;
 
 /**
@@ -7,7 +10,7 @@ import io.realm.RealmObject;
  */
 public class Order extends RealmObject{
     private String note ;
-    private String menuResult;
+    private String menuResults;
     private String storeInfo;
 
 
@@ -19,12 +22,12 @@ public class Order extends RealmObject{
         this.note = note;
     }
 
-    public String getMenuResult() {
-        return menuResult;
+    public String getMenuResults() {
+        return menuResults;
     }
 
-    public void setMenuResult(String menuResult) {
-        this.menuResult = menuResult;
+    public void setMenuResults(String menuResults) {
+        this.menuResults = menuResults;
     }
 
     public String getStoreInfo() {
@@ -33,5 +36,14 @@ public class Order extends RealmObject{
 
     public void setStoreInfo(String storeInfo) {
         this.storeInfo = storeInfo;
+    }
+
+    public void saveToRemote(SaveCallback saveCallback){
+        ParseObject parseObject = new ParseObject("Order");//CLASS名稱
+        parseObject.put("note", note);//欄位 對應值
+        parseObject.put("storeInfo", storeInfo);//欄位 對應值
+        parseObject.put("menuResults", menuResults);//欄位 對應值
+
+        parseObject.saveInBackground(saveCallback);
     }
 }
