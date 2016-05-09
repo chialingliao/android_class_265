@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_MENU_ACTIVITY = 0;
     private static final int REQUEST_CODE_CAMERA_ACTIVITY = 1;
 
+    private boolean hasPhoto = false;
     TextView textView;//宣告
     EditText editText;
     RadioGroup radioGroup;
@@ -282,6 +283,18 @@ public class MainActivity extends AppCompatActivity {
         order.setMenuResults(menuResults);
         order.setNote(note);
         order.setStoreInfo((String) spinner.getSelectedItem());//選擇後的值
+        //如果有圖要上傳 URI 讀檔
+        if(hasPhoto){
+            Uri uri = Utils.getPhotoURI();
+            byte[] photo = Utils.uriToBytes(this, uri);
+
+            if(photo == null){
+                Log.d("Debug", "Read Photo Fail");
+            }else{
+                order.photo = photo;
+            }
+        }
+
 
         //LOCAL端
  /*       realm.beginTransaction();
@@ -297,7 +310,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 editText.setText("");//資料抓完清空
                 menuResults = "";
-
+                photoImageView.setImageResource(0);
+                hasPhoto = false;
      /*           Realm realm = Realm.getDefaultInstance();
                 //LOCAL端
                 realm.beginTransaction();
@@ -337,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
         }else if (requestCode == REQUEST_CODE_CAMERA_ACTIVITY) {
             if (resultCode == RESULT_OK) {
                photoImageView.setImageURI(Utils.getPhotoURI());
+                hasPhoto = true;
 
             }
         }

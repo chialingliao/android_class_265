@@ -4,11 +4,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 /**
@@ -33,7 +35,7 @@ public class Utils {
         try {
             FileInputStream fis = context.openFileInput(fileName);
             byte[] buffer = new byte[1024];
-            fis.read(buffer, 0 , buffer.length);
+            fis.read(buffer, 0, buffer.length);
             fis.close();
             return new String(buffer);
         } catch (FileNotFoundException e) {
@@ -52,5 +54,25 @@ public class Utils {
 
         File file = new File(dir, "simpleUI_photo.png");//檔案名稱
         return Uri.fromFile(file);
+    }
+
+    public  static byte[] uriToBytes(Context context, Uri uri){
+        try {//二維讀取
+            InputStream inputStream = context.getContentResolver().openInputStream(uri);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+            byte[] buffer = new byte[1024];
+            int len = 0;
+            while((len = inputStream.read(buffer)) != -1){
+                byteArrayOutputStream.write(buffer);
+
+            }
+            return byteArrayOutputStream.toByteArray();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return  null;
     }
 }

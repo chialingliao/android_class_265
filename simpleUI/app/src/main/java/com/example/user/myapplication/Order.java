@@ -1,5 +1,6 @@
 package com.example.user.myapplication;
 
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.SaveCallback;
 
@@ -12,6 +13,8 @@ public class Order extends RealmObject{
     private String note ;
     private String menuResults;
     private String storeInfo;
+
+    byte[] photo = null;
 
 
     public String getNote() {
@@ -44,6 +47,10 @@ public class Order extends RealmObject{
         parseObject.put("storeInfo", storeInfo);//欄位 對應值
         parseObject.put("menuResults", menuResults);//欄位 對應值
 
+        if(photo != null) {
+            ParseFile file = new ParseFile("photo.png", photo);//資料大 不能直接傳
+            parseObject.put("photo", file);
+        }
         parseObject.saveInBackground(saveCallback);
     }
 }
