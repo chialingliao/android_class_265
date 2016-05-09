@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -208,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
-                if(e!=null){
+                if (e != null) {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 
 
@@ -218,14 +220,14 @@ public class MainActivity extends AppCompatActivity {
                 }
                 List<Order> orders = new ArrayList<Order>();
                 Realm realm = Realm.getDefaultInstance();
-                for(int i = 0 ; i < objects.size(); i++){
+                for (int i = 0; i < objects.size(); i++) {
                     Order order = new Order();
                     order.setNote(objects.get(i).getString("note"));
                     order.setStoreInfo(objects.get(i).getString("storeInfo"));
                     order.setMenuResults(objects.get(i).getString("menuResults"));
                     orders.add(order);
 
-                    if(results.size() <= i){//遠端個數 > LOCAL 自動載入
+                    if (results.size() <= i) {//遠端個數 > LOCAL 自動載入
                         realm.beginTransaction();
                         realm.copyToRealm(order);
                         realm.commitTransaction();
@@ -313,6 +315,21 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.action_take_photo){
+            Toast.makeText(this, "Take Photo", Toast.LENGTH_LONG).show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     protected void onStart() {
