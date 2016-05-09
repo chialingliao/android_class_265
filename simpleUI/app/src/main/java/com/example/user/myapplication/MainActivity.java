@@ -3,7 +3,10 @@ package com.example.user.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
@@ -35,6 +39,7 @@ import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.Manifest;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -43,6 +48,7 @@ import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_MENU_ACTIVITY = 0;
+    private static final int REQUEST_CODE_CAMERA_ACTIVITY = 1;
 
     TextView textView;//宣告
     EditText editText;
@@ -55,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinner;
     String menuResults = "";
     ProgressBar progressBar;
+    ImageView photoImageView;
 
     //存入記憶體 若大量存取及寫入會爆炸
     SharedPreferences sp;
@@ -98,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         orders = new ArrayList<>();
         spinner = (Spinner) findViewById(R.id.spinner);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        photoImageView = (ImageView)findViewById(R.id.imageView);
 
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);//你要拿setting 裡的東西
         editor = sp.edit();//拿出setting裡某特殊內容 寫入
@@ -314,6 +322,11 @@ public class MainActivity extends AppCompatActivity {
                 menuResults = data.getStringExtra("result");
 
             }
+        }else if (requestCode == REQUEST_CODE_CAMERA_ACTIVITY) {
+            if (resultCode == RESULT_OK) {
+               photoImageView.setImageURI(Utils.getPhotoURI());
+
+            }
         }
     }
 
@@ -328,8 +341,23 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         if(id == R.id.action_take_photo){
             Toast.makeText(this, "Take Photo", Toast.LENGTH_LONG).show();
+            goToCamera();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected  void goToCamera(){
+        if(Build.VERSION.SDK_INT >= 23){//版本須先確定可存取
+            if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {//確定未接受
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);//詢問接受
+                return;
+            }
+        }
+        //呼叫CameraActivity
+        Intent intent = new Intent();
+        intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);//找出 相機 拍完一張就會回來
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Utils.getPhotoURI());//照片存放位置
+        startActivityForResult(intent, REQUEST_CODE_CAMERA_ACTIVITY);
     }
 
     protected void onStart() {
