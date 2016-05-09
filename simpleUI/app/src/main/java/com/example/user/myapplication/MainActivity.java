@@ -194,6 +194,14 @@ public class MainActivity extends AppCompatActivity {
         OrderAdapter adapter = new OrderAdapter(this, results.subList(0, results.size()));//自建物件
         listView.setAdapter(adapter);//把東西丟進去
 */
+
+        final RealmResults results = realm.allObjects(Order.class);//所有的訂單
+
+        OrderAdapter adapter = new OrderAdapter(MainActivity.this, results.subList(0, results.size()));//自建物件
+        listView.setAdapter(adapter);//把東西丟進去
+
+
+
         ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Order");
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -201,23 +209,29 @@ public class MainActivity extends AppCompatActivity {
                 if(e!=null){
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 
-                    Realm realm = Realm.getDefaultInstance();
-                    RealmResults results = realm.allObjects(Order.class);//所有的訂單
 
-                    OrderAdapter adapter = new OrderAdapter(MainActivity.this, results.subList(0, results.size()));//自建物件
-                    listView.setAdapter(adapter);//把東西丟進去
-                    realm.close();
 
                     return;
                 }
                 List<Order> orders = new ArrayList<Order>();
+                Realm realm = Realm.getDefaultInstance();
                 for(int i = 0 ; i < objects.size(); i++){
                     Order order = new Order();
                     order.setNote(objects.get(i).getString("note"));
                     order.setStoreInfo(objects.get(i).getString("storeInfo"));
                     order.setMenuResults(objects.get(i).getString("menuResults"));
                     orders.add(order);
+
+                    if(results.size() <= i){//遠端個數 > LOCAL 自動載入
+                        realm.beginTransaction();
+                        realm.copyToRealm(order);
+                        realm.commitTransaction();
+
+                    }
+
                 }
+
+                realm.close();
                 OrderAdapter adapter = new OrderAdapter(MainActivity.this, orders);
                 listView.setAdapter(adapter);//把東西丟進去
             }
