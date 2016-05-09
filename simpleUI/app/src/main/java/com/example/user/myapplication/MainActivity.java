@@ -267,10 +267,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void setupSpinner() {
-        String[] data = getResources().getStringArray(R.array.storeInfo);
+/*        String[] data = getResources().getStringArray(R.array.storeInfo);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
 
         spinner.setAdapter(adapter);
+
+        */
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("StoreInfo");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e != null) {
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+
+
+                    progressBar.setVisibility(View.GONE);//結束後 要消失 不管成功與否
+
+                    return;
+                }
+
+                progressBar.setVisibility(View.GONE);//結束後 要消失 不管成功與否
+                ArrayList  aaa = new ArrayList();
+                for (int i = 0; i < objects.size(); i++) {
+
+                    String name = objects.get(i).getString("name");
+                    aaa.add(name);
+
+                }
+                ArrayAdapter adapter = new ArrayAdapter(MainActivity.this,android.R.layout.simple_spinner_dropdown_item, aaa);
+                spinner.setAdapter(adapter);//把東西丟進去
+            }
+        });
+
     }
 
 
