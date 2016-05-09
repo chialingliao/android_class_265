@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     Spinner spinner;
     String menuResults = "";
+    ProgressBar progressBar;
 
     //存入記憶體 若大量存取及寫入會爆炸
     SharedPreferences sp;
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.listView);
         orders = new ArrayList<>();
         spinner = (Spinner) findViewById(R.id.spinner);
-
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
 
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);//你要拿setting 裡的東西
         editor = sp.edit();//拿出setting裡某特殊內容 寫入
@@ -194,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         OrderAdapter adapter = new OrderAdapter(this, results.subList(0, results.size()));//自建物件
         listView.setAdapter(adapter);//把東西丟進去
 */
-
+        progressBar.setVisibility(View.VISIBLE);//資料回來前顯示
         final RealmResults results = realm.allObjects(Order.class);//所有的訂單
 
         OrderAdapter adapter = new OrderAdapter(MainActivity.this, results.subList(0, results.size()));//自建物件
@@ -210,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 
 
+                    progressBar.setVisibility(View.GONE);//結束後 要消失 不管成功與否
 
                     return;
                 }
@@ -232,6 +235,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 realm.close();
+                progressBar.setVisibility(View.GONE);//結束後 要消失 不管成功與否
+
                 OrderAdapter adapter = new OrderAdapter(MainActivity.this, orders);
                 listView.setAdapter(adapter);//把東西丟進去
             }
