@@ -1,5 +1,6 @@
 package com.example.user.myapplication;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinner;
     String menuResults = "";
     ProgressBar progressBar;
+    ProgressDialog progressDialog;
     ImageView photoImageView;
 
     //存入記憶體 若大量存取及寫入會爆炸
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         spinner = (Spinner) findViewById(R.id.spinner);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         photoImageView = (ImageView)findViewById(R.id.imageView);
-
+        progressDialog = new ProgressDialog(this);//圖片放置
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);//你要拿setting 裡的東西
         editor = sp.edit();//拿出setting裡某特殊內容 寫入
 
@@ -303,6 +305,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void click(View view) {//BTN 改值 須設定ONCLICK
+        progressDialog.setTitle("Loading....");
+        progressDialog.show();//顯示
+
         note = editText.getText().toString(); //把畫面資料抓出來
         String text = note;
         textView.setText(text);
@@ -340,6 +345,7 @@ public class MainActivity extends AppCompatActivity {
                 menuResults = "";
                 photoImageView.setImageResource(0);
                 hasPhoto = false;
+                progressDialog.dismiss();//圖片消失
      /*           Realm realm = Realm.getDefaultInstance();
                 //LOCAL端
                 realm.beginTransaction();
