@@ -178,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 Order order = (Order) parent.getAdapter().getItem(position);//取得點擊的資訊 物件可轉型   parent.getAdapter() 拿出資料串
    /*             Toast.makeText(MainActivity.this,order.note, Toast.LENGTH_SHORT).show();//顯示效果  LENGTH_SHORT /LENGTH_LONG 效果的長短
                 //↑this 如果MainActivity 未加 會變成  AdapterView.OnItemClickListener 本身*/
+                goToDetailOrder(order);
                 Snackbar.make(view, order.getNote(), Snackbar.LENGTH_SHORT).show();//顯示功能速度比Toast 快 搭配元件 compile 'com.android.support:design:23.2.1'
                 //Snackbar 取代Toast 原因1.點擊後可在進一步UI 2.各元件可以UI互通
                 //Snackbar.make(view,order.note, Snackbar.LENGTH_SHORT).setAction()//點擊後可執行的METHOD
@@ -214,6 +215,8 @@ public class MainActivity extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+
+
     void setupListView() {
         //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
 /*        RealmResults results = realm.allObjects(Order.class);//所有的訂單
@@ -248,6 +251,11 @@ public class MainActivity extends AppCompatActivity {
                     order.setNote(objects.get(i).getString("note"));
                     order.setStoreInfo(objects.get(i).getString("storeInfo"));
                     order.setMenuResults(objects.get(i).getString("menuResults"));
+                    if(objects.get(i).getParseFile("photo")!=null){//下載圖片
+                        order.photoURL = objects.get(i).getParseFile("photo").getUrl();
+                    }
+
+
                     orders.add(order);
 
                     if (results.size() <= i) {//遠端個數 > LOCAL 自動載入
@@ -373,6 +381,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void goToDetailOrder(Order order) {
+        Intent intent = new Intent();
+        intent.setClass(this, OrderDetailActivity.class);
+
+        intent.putExtra("note", order.getNote());
+        intent.putExtra("storeInfo", order.getStoreInfo());
+        intent.putExtra("menuResults", order.getMenuResults());
+        intent.putExtra("photoURL", order.photoURL);
+        startActivity(intent);
+
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {//讀取結果
         super.onActivityResult(requestCode, resultCode, data);
