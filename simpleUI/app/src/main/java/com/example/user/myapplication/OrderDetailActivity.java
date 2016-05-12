@@ -1,6 +1,9 @@
 package com.example.user.myapplication;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -47,9 +50,52 @@ public class OrderDetailActivity extends AppCompatActivity {
         }
         menuResults.setText(text);
 
-        if(!intent.getStringExtra("photoURL").equals("")){
-            Picasso.with(this).load(intent.getStringExtra("photoURL")).into(photo);
+        if(!intent.getStringExtra("photoURL").equals("")) {
+        //    Picasso.with(this).load(intent.getStringExtra("photoURL")).into(photo);
+
+            (new ImageLoadingTask(photo)).execute(intent.getStringExtra("photoURL"));
+
+            //匿名函式 檔案即使已關閉  其實還是綁住資源 所以可從thread看是否已存在
+            /*for (int i = 0; i < 10; i++) {
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            wait(100000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                thread.start();
+            }*/
         }
 
     }
+    //屬於自己的記憶體
+    class ImageLoadingTask extends AsyncTask<String, Void, Bitmap>{
+        ImageView imageView;
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            String url = params[0];
+            byte[] bytes = Utils.urlToBytes(url);
+            if(bytes!=null) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                return bitmap;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+
+            if(bitmap != null){
+                imageView.setImageBitmap(bitmap);
+            }
+        }
+
+        public ImageLoadingTask(ImageView imageView){this.imageView = imageView;}
+    }
+
 }
