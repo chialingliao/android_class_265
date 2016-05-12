@@ -53,8 +53,8 @@ public class OrderDetailActivity extends AppCompatActivity {
         if(!intent.getStringExtra("photoURL").equals("")) {
         //    Picasso.with(this).load(intent.getStringExtra("photoURL")).into(photo);
 
-            (new ImageLoadingTask(photo)).execute(intent.getStringExtra("photoURL"));
-
+        //    (new ImageLoadingTask(photo)).execute(intent.getStringExtra("photoURL"));
+            (new GeoCodingTask(photo)).execute("台北縣汐止區大同路一段369號");
             //匿名函式 檔案即使已關閉  其實還是綁住資源 所以可從thread看是否已存在
             /*for (int i = 0; i < 10; i++) {
                 Thread thread = new Thread(new Runnable() {
@@ -72,8 +72,27 @@ public class OrderDetailActivity extends AppCompatActivity {
         }
 
     }
+
+    private  static  class GeoCodingTask extends AsyncTask<String, Void, Bitmap>{
+        ImageView imageView;
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            String address = params[0];
+            double[] latlng = Utils.addressToLatLng(address);
+            return Utils.getStaticMap(latlng);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+            imageView.setImageBitmap(bitmap);
+        }
+        public GeoCodingTask(ImageView imageView){this.imageView = imageView;}
+    }
+
+
     //屬於自己的記憶體
-    class ImageLoadingTask extends AsyncTask<String, Void, Bitmap>{
+    private static class ImageLoadingTask extends AsyncTask<String, Void, Bitmap>{
         ImageView imageView;
         @Override
         protected Bitmap doInBackground(String... params) {
