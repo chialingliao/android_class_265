@@ -146,7 +146,7 @@ public class Utils {
 
     public static Bitmap getStaticMap(double[] latlng){
         String center = latlng[0] + "," + latlng[1];
-        String staticMapUrl =  "http://maps.googleapis.com/maps/api/staticmap?center=" + center + "&zoom=17&size=600x300&maptype=roadmap";
+        String staticMapUrl =  "http://maps.googleapis.com/maps/api/staticmap?center=" + center + "&zoom=17&size=640x400&maptype=roadmap";
         byte[] bytes = Utils.urlToBytes(staticMapUrl);
         if(bytes !=null) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);

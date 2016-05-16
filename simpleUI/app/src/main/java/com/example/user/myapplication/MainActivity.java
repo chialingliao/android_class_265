@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
-                if (e != null) {
+                if (e != null || objects == null) {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 
 
@@ -297,14 +297,14 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 progressBar.setVisibility(View.GONE);//結束後 要消失 不管成功與否
-                ArrayList  aaa = new ArrayList();
+                String[] storeInfo = new String[objects.size()];
                 for (int i = 0; i < objects.size(); i++) {
 
-                    String name = objects.get(i).getString("name");
-                    aaa.add(name);
+                    ParseObject object = objects.get(i);
+                    storeInfo[i] = object.getString("name") + "," + object.getString("address");
 
                 }
-                ArrayAdapter adapter = new ArrayAdapter(MainActivity.this,android.R.layout.simple_spinner_dropdown_item, aaa);
+                ArrayAdapter adapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_spinner_dropdown_item, storeInfo);
                 spinner.setAdapter(adapter);//把東西丟進去
             }
         });

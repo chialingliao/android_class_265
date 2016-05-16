@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -21,6 +22,10 @@ public class OrderDetailActivity extends AppCompatActivity {
     TextView storeInfo;
     TextView menuResults;
     ImageView photo;
+    ImageView mapImageView;
+
+    String storeName = "";
+    String address = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,10 +35,16 @@ public class OrderDetailActivity extends AppCompatActivity {
         storeInfo = (TextView) findViewById(R.id.storeInfo);
         menuResults = (TextView)findViewById(R.id.menuResults);
         photo = (ImageView)findViewById(R.id.photoImageView);
+        mapImageView = (ImageView)findViewById(R.id.mapImageView);
 
         Intent intent = getIntent();
         note.setText(intent.getStringExtra("note"));
         storeInfo.setText(intent.getStringExtra("storeInfo"));
+
+        String[] info = intent.getStringExtra("storeInfo").split(",");
+
+        storeName = info[0];
+        address = info[1];
 
         String results = intent.getStringExtra("menuResults");
         String text = "";
@@ -53,23 +64,23 @@ public class OrderDetailActivity extends AppCompatActivity {
         if(!intent.getStringExtra("photoURL").equals("")) {
         //    Picasso.with(this).load(intent.getStringExtra("photoURL")).into(photo);
 
-        //    (new ImageLoadingTask(photo)).execute(intent.getStringExtra("photoURL"));
-            (new GeoCodingTask(photo)).execute("台北縣汐止區大同路一段369號");
-            //匿名函式 檔案即使已關閉  其實還是綁住資源 所以可從thread看是否已存在
-            /*for (int i = 0; i < 10; i++) {
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            wait(100000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                thread.start();
-            }*/
+           (new ImageLoadingTask(photo)).execute(intent.getStringExtra("photoURL"));
+        //    (new GeoCodingTask(photo)).execute("台北縣汐止區大同路一段369號");
+
         }
+        (new GeoCodingTask(mapImageView)).execute(address);
+        //匿名函式 檔案即使已關閉  其實還是綁住資源 所以可從thread看是否已存在
+     /*   for (int i = 0; i < 10; i++) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while(true){
+                        SystemClock.sleep(1000);
+                    }
+                }
+            });
+
+        }*/
 
     }
 
