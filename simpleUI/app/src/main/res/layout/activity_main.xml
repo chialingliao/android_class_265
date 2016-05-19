@@ -112,4 +112,12 @@
         android:layout_alignLeft="@+id/radioGroup"
         android:layout_alignStart="@+id/radioGroup" />
 
+    <com.facebook.login.widget.LoginButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/loginBotton"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/button"
+        android:layout_toEndOf="@+id/button" />
+
 </RelativeLayout>

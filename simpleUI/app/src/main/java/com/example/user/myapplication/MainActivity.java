@@ -30,6 +30,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -40,6 +48,9 @@ import com.parse.SaveCallback;
 import java.util.ArrayList;
 import java.util.List;
 import android.Manifest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -64,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressBar;
     ProgressDialog progressDialog;
     ImageView photoImageView;
-
     //存入記憶體 若大量存取及寫入會爆炸
     SharedPreferences sp;
     SharedPreferences.Editor editor;
@@ -75,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private CallbackManager callbackManger;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
 
         setupListView();
         setupSpinner();
+        setFaceBook();
 
         //下拉初始化
         int selectedId = sp.getInt("spinner", 0);
@@ -211,7 +223,46 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    void setFaceBook(){
+        callbackManger = CallbackManager.Factory.create();
+        LoginButton loginButton  = (LoginButton)findViewById(R.id.loginBotton);
+        if(loginButton !=null) {
+            loginButton.registerCallback(callbackManger, new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    AccessToken accessToken = AccessToken.getCurrentAccessToken();
+                    GraphRequest request = GraphRequest.newGraphPathRequest(accessToken
+                            , "/v2.5/me",
+                            new GraphRequest.Callback() {
+                                @Override
+                                public void onCompleted(GraphResponse response) {
+                                    JSONObject object = response.getJSONObject();
+                                    try {
+                                        String name = object.getString("name");
+                                        Toast.makeText(MainActivity.this, "Hello " + name, Toast.LENGTH_SHORT).show();
+                                        textView.setText("Hello " + name);
+                                        Log.d("debug", object.toString());
 
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                    request.executeAsync();
+                }
+
+                @Override
+                public void onCancel() {
+
+                }
+
+                @Override
+                public void onError(FacebookException error) {
+
+                }
+            });
+        }
+    }
 
     void setupListView() {
         //      ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, orders);//把orders 放到simple_list_item_1 上面
@@ -404,6 +455,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+        callbackManger.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
